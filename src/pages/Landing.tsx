@@ -12,7 +12,7 @@ export default function Landing() {
             <span className="text-2xl font-bold text-gray-900">Alfred</span>
           </div>
           <div className="flex items-center space-x-4">
-            <button onClick={() => window.location.href = '/login'} className="text-gray-600 hover:text-gray-900">
+            <button onClick={() => navigate("/login")} className="text-gray-600 hover:text-gray-900">
               Login
             </button>
             <button onClick={() => window.location.href = '/signup'} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
