@@ -43,15 +43,19 @@ export function App() {
     <>
       <Router>
         <Routes>
+          {/* Public routes */}
           <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Landing />} />
           <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />
           <Route path="/signup" element={user ? <Navigate to="/dashboard" /> : <Signup />} />
-          <Route
-            path="/dashboard/*"
-            element={user ? <Dashboard /> : <Navigate to="/login" />}
-          />
+
+          {/* Protected routes */}
+          <Route path="/dashboard/*" element={user ? <Dashboard /> : <Navigate to="/login" />} />
+
+          {/* Catch-all route */}
+          <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} />} />
         </Routes>
       </Router>
+
       <Toaster 
         position="top-right"
         toastOptions={{
