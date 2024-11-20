@@ -1,7 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Brain, BarChart3, Users, Shield, ArrowUpRight } from 'lucide-react';
 
 export default function Landing() {
+  const navigate = useNavigate(); // Initialize the navigate function
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Navigation */}
@@ -12,10 +15,11 @@ export default function Landing() {
             <span className="text-2xl font-bold text-gray-900">Alfred</span>
           </div>
           <div className="flex items-center space-x-4">
-            <button onClick={() => window.location.href = '/login'} className="text-gray-600 hover:text-gray-900">
+            {/* Use navigate for routing */}
+            <button onClick={() => navigate('/login')} className="text-gray-600 hover:text-gray-900">
               Login
             </button>
-            <button onClick={() => window.location.href = '/signup'} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            <button onClick={() => navigate('/signup')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
               Get Started
             </button>
           </div>
@@ -33,7 +37,8 @@ export default function Landing() {
             Streamline your agency operations, manage team assignments, and track financial metrics all in one powerful dashboard.
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
-            <button onClick={() => window.location.href = '/signup'} className="rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 flex items-center space-x-2">
+            {/* Use navigate for routing */}
+            <button onClick={() => navigate('/signup')} className="rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 flex items-center space-x-2">
               <span>Start Free Trial</span>
               <ArrowRight className="h-4 w-4" />
             </button>
