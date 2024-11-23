@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, UserPlus, MoreVertical, Trash2 } from 'lucide-react';
+import { Users, UserPlus, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore'; // Import the authStore
 import { supabase } from '../lib/supabase.ts';
 
@@ -54,6 +54,24 @@ export default function TeamManagement() {
     }
   };
 
+  // Delete a user
+  const deleteUser = async (userId) => {
+    try {
+      // Delete from auth.users
+      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+      if (authError) throw authError;
+
+      // Delete from public.users
+      const { error: publicError } = await supabase.from('users').delete().eq('id', userId);
+      if (publicError) throw publicError;
+
+      // Update local state
+      setUsers((prev) => prev.filter((user) => user.id !== userId));
+    } catch (error) {
+      console.error('Error deleting user:', error.message);
+    }
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm">
       <div className="p-6 border-b border-gray-200">
@@ -102,7 +120,10 @@ export default function TeamManagement() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button className="text-red-500 hover:text-red-700">
+                    <button
+                      onClick={() => deleteUser(user.id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
                       <Trash2 className="h-5 w-5" />
                     </button>
                   </td>
