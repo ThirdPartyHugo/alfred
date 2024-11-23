@@ -54,16 +54,21 @@ export default function TeamManagement() {
     }
   };
 
-  // Delete a user
+  // Delete a user (calls backend API)
   const deleteUser = async (userId) => {
     try {
-      // Delete from auth.users
-      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-      if (authError) throw authError;
+      const response = await fetch('/api/deleteUser', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId }),
+      });
 
-      // Delete from public.users
-      const { error: publicError } = await supabase.from('users').delete().eq('id', userId);
-      if (publicError) throw publicError;
+      if (!response.ok) {
+        const { error } = await response.json();
+        throw new Error(error || 'Failed to delete user');
+      }
 
       // Update local state
       setUsers((prev) => prev.filter((user) => user.id !== userId));
