@@ -1,5 +1,3 @@
-// pages/api/deleteUser.js
-
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase client with service role key
@@ -24,7 +22,7 @@ export default async function handler(req, res) {
     const { error: deleteError } = await supabaseAdmin
       .from('users')
       .delete()
-      .eq('auth_user_id', userId);
+      .eq('id', userId);
 
     if (deleteError) {
       console.error('Error deleting user from users table:', deleteError);
