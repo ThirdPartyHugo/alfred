@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Users, UserPlus, Trash2 } from 'lucide-react';
-import { useAuthStore } from '../store/authStore'; // Import the authStore
+import { useAuthStore } from '../store/authStore';
 import { supabase } from '../lib/supabase.ts';
 
 export default function TeamManagement() {
@@ -11,13 +11,15 @@ export default function TeamManagement() {
   const [newPassword, setNewPassword] = useState('');
   const [newCompanyName, setNewCompanyName] = useState('');
 
-  const { signUp } = useAuthStore(); // Access signUp from authStore
+  const { signUp } = useAuthStore();
 
   // Fetch users from Supabase
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
-      const { data, error } = await supabase.from('users').select('id, auth_user_id, email, created_at');
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, auth_user_id, email, created_at');
       if (error) {
         console.error('Error fetching users:', error);
       } else {
@@ -27,22 +29,28 @@ export default function TeamManagement() {
     };
     fetchUsers();
   }, []);
-  
+
   // Add a new user
   const addUser = async () => {
     try {
-      // Use the authStore to sign up the user
-      await signUp(newEmail, newPassword, newCompanyName);
+      const { user, error } = await signUp(newEmail, newPassword, newCompanyName);
 
-      // Add user to public.users
+      if (error) {
+        throw error;
+      }
+
+      // Add user to public.users with auth_user_id
       await supabase.from('users').insert({
+        auth_user_id: user.id,
         email: newEmail,
         company_name: newCompanyName,
         created_at: new Date().toISOString(),
       });
 
       // Fetch updated users
-      const { data } = await supabase.from('users').select('id, email, created_at');
+      const { data } = await supabase
+        .from('users')
+        .select('id, auth_user_id, email, created_at');
       setUsers(data);
 
       setNewEmail('');
@@ -55,29 +63,36 @@ export default function TeamManagement() {
   };
 
   // Delete a user (calls backend API)
-  // Delete a user (calls backend API)
-const deleteUser = async (authUserId) => {
-  try {
-    const response = await fetch('/api/deleteUser', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userId: authUserId }),
-    });
-
-    if (!response.ok) {
-      const { error } = await response.json();
-      throw new Error(error || 'Failed to delete user');
+  const deleteUser = async (authUserId) => {
+    if (
+      !confirm(
+        'Are you sure you want to delete this user? This action cannot be undone.'
+      )
+    ) {
+      return;
     }
+    try {
+      const response = await fetch('/api/deleteUser', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: authUserId }),
+      });
 
-    // Update local state
-    setUsers((prev) => prev.filter((user) => user.auth_user_id !== authUserId));
-  } catch (error) {
-    console.error('Error deleting user:', error.message);
-  }
-};
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        const errorMessage = errorResponse.error || 'Failed to delete user';
+        throw new Error(errorMessage);
+      }
 
+      // Update local state
+      setUsers((prev) => prev.filter((user) => user.auth_user_id !== authUserId));
+    } catch (error) {
+      console.error('Error deleting user:', error.message);
+      alert(`Error deleting user: ${error.message}`);
+    }
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-sm">
@@ -128,7 +143,7 @@ const deleteUser = async (authUserId) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
-                      onClick={() => deleteUser(user.id)}
+                      onClick={() => deleteUser(user.auth_user_id)}
                       className="text-red-500 hover:text-red-700"
                     >
                       <Trash2 className="h-5 w-5" />
