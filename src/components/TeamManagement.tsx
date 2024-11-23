@@ -17,9 +17,7 @@ export default function TeamManagement() {
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('users')
-        .select('id, email, created_at');
+      const { data, error } = await supabase.from('users').select('id, auth_user_id, email, created_at');
       if (error) {
         console.error('Error fetching users:', error);
       } else {
@@ -29,29 +27,22 @@ export default function TeamManagement() {
     };
     fetchUsers();
   }, []);
-
+  
   // Add a new user
   const addUser = async () => {
     try {
       // Use the authStore to sign up the user
-      const { user, error } = await signUp(newEmail, newPassword, newCompanyName);
+      await signUp(newEmail, newPassword, newCompanyName);
 
-      if (error) {
-        throw error;
-      }
-
-      // Add user to public.users with auth_user_id
+      // Add user to public.users
       await supabase.from('users').insert({
-        auth_user_id: user.id, // Store the auth user ID
         email: newEmail,
         company_name: newCompanyName,
         created_at: new Date().toISOString(),
       });
 
       // Fetch updated users
-      const { data } = await supabase
-        .from('users')
-        .select('id, email, created_at');
+      const { data } = await supabase.from('users').select('id, email, created_at');
       setUsers(data);
 
       setNewEmail('');
@@ -64,35 +55,29 @@ export default function TeamManagement() {
   };
 
   // Delete a user (calls backend API)
-  const deleteUser = async (authUserId) => {
-    if (
-      !confirm(
-        'Are you sure you want to delete this user? This action cannot be undone.'
-      )
-    ) {
-      return;
-    }
-    try {
-      const response = await fetch('/api/deleteUser', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId: authUserId }),
-      });
+  // Delete a user (calls backend API)
+const deleteUser = async (authUserId) => {
+  try {
+    const response = await fetch('/api/deleteUser', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId: authUserId }),
+    });
 
-      if (!response.ok) {
-        const { error } = await response.json();
-        throw new Error(error || 'Failed to delete user');
-      }
-
-      // Update local state
-      setUsers((prev) => prev.filter((user) => user.id !== authUserId));
-    } catch (error) {
-      console.error('Error deleting user:', error.message);
-      alert(`Error deleting user: ${error.message}`);
+    if (!response.ok) {
+      const { error } = await response.json();
+      throw new Error(error || 'Failed to delete user');
     }
-  };
+
+    // Update local state
+    setUsers((prev) => prev.filter((user) => user.auth_user_id !== authUserId));
+  } catch (error) {
+    console.error('Error deleting user:', error.message);
+  }
+};
+
 
   return (
     <div className="bg-white rounded-xl shadow-sm">
@@ -143,7 +128,7 @@ export default function TeamManagement() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
-                      onClick={() => deleteUser(user.id)} // Use auth_user_id here
+                      onClick={() => deleteUser(user.id)}
                       className="text-red-500 hover:text-red-700"
                     >
                       <Trash2 className="h-5 w-5" />
