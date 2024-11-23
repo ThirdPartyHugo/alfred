@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Users, UserPlus, MoreVertical } from 'lucide-react';
-import { supabase } from '../supabaseClient'; // Ensure this is your Supabase client setup file
+import { supabase } from '../lib/supabase.ts'; // Ensure this is your Supabase client setup file
 
 export default function TeamManagement() {
   const [users, setUsers] = useState([]);
