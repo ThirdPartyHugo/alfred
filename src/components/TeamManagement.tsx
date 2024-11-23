@@ -9,6 +9,14 @@ export default function TeamManagement() {
 
   // Fetch users from Supabase
   useEffect(() => {
+  const fetchSession = async () => {
+    const session = supabase.auth.session();
+    console.log('Current session:', session);
+  };
+  fetchSession();
+}, []);
+
+  useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
       const { data, error } = await supabase.from('auth.users').select('id, email, created_at');
