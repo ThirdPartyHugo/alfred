@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'; 
 import { Bell, Search, Settings, LogOut } from 'lucide-react';
 import { supabase } from '../lib/supabase'; // Adjust the path to your Supabase client
 import { useNavigate } from 'react-router-dom'; // If you're using react-router-dom for navigation
