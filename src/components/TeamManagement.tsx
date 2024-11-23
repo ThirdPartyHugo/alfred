@@ -87,7 +87,7 @@ export default function TeamManagement() {
       }
 
       // Update local state
-      setUsers((prev) => prev.filter((user) => user.auth_user_id !== authUserId));
+      setUsers((prev) => prev.filter((user) => user.id !== authUserId));
     } catch (error) {
       console.error('Error deleting user:', error.message);
       alert(`Error deleting user: ${error.message}`);
@@ -143,7 +143,7 @@ export default function TeamManagement() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
-                      onClick={() => deleteUser(user.auth_user_id)}
+                      onClick={() => deleteUser(user.id)}
                       className="text-red-500 hover:text-red-700"
                     >
                       <Trash2 className="h-5 w-5" />
