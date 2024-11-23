@@ -19,7 +19,7 @@ export default function TeamManagement() {
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
-      const { data, error } = await supabase.from('auth.users').select('id, email, created_at');
+      const { data, error } = await supabase.from('users').select('id, email, created_at');
       if (error) {
         console.error('Error fetching users:', error);
       } else {
