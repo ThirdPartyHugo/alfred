@@ -1,39 +1,26 @@
-import React, { useState } from 'react';
-import { Users, UserPlus, Filter, MoreVertical } from 'lucide-react';
-
-const teamMembers = [
-  {
-    id: 1,
-    name: 'Sarah Johnson',
-    role: 'Media Buyer',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    accounts: ['Acme Corp', 'Tech Innovate'],
-    performance: 94,
-    status: 'active'
-  },
-  {
-    id: 2,
-    name: 'Michael Chen',
-    role: 'Content Creator',
-    image: 'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    accounts: ['Stellar Industries'],
-    performance: 88,
-    status: 'active'
-  },
-  {
-    id: 3,
-    name: 'Emma Davis',
-    role: 'Ad Designer',
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    accounts: ['Acme Corp', 'Stellar Industries', 'Tech Innovate'],
-    performance: 92,
-    status: 'active'
-  }
-];
+import React, { useState, useEffect } from 'react';
+import { Users, UserPlus, MoreVertical } from 'lucide-react';
+import { supabase } from '../supabaseClient'; // Ensure this is your Supabase client setup file
 
 export default function TeamManagement() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [roleFilter, setRoleFilter] = useState('all');
-  const [showAssignModal, setShowAssignModal] = useState(false);
+
+  // Fetch users from Supabase
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setLoading(true);
+      const { data, error } = await supabase.from('auth.users').select('id, email, created_at');
+      if (error) {
+        console.error('Error fetching users:', error);
+      } else {
+        setUsers(data);
+      }
+      setLoading(false);
+    };
+    fetchUsers();
+  }, []);
 
   return (
     <div className="bg-white rounded-xl shadow-sm">
@@ -55,7 +42,6 @@ export default function TeamManagement() {
               <option value="ad-designer">Ad Designers</option>
             </select>
             <button
-              onClick={() => setShowAssignModal(true)}
               className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               <UserPlus className="h-4 w-4" />
@@ -66,74 +52,46 @@ export default function TeamManagement() {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="text-left bg-gray-50">
-              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Team Member</th>
-              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Accounts</th>
-              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Performance</th>
-              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {teamMembers.map((member) => (
-              <tr key={member.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <img className="h-10 w-10 rounded-full" src={member.image} alt="" />
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">{member.name}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    member.role === 'Media Buyer' ? 'bg-purple-100 text-purple-800' :
-                    member.role === 'Content Creator' ? 'bg-green-100 text-green-800' :
-                    'bg-blue-100 text-blue-800'
-                  }`}>
-                    {member.role}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex flex-wrap gap-1">
-                    {member.accounts.map((account) => (
-                      <span key={account} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                        {account}
-                      </span>
-                    ))}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                      <div
-                        className={`h-2 rounded-full ${
-                          member.performance >= 90 ? 'bg-green-500' :
-                          member.performance >= 70 ? 'bg-yellow-500' : 'bg-red-500'
-                        }`}
-                        style={{ width: `${member.performance}%` }}
-                      ></div>
-                    </div>
-                    <span className="text-sm text-gray-600">{member.performance}%</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    {member.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button className="text-gray-400 hover:text-gray-600">
-                    <MoreVertical className="h-5 w-5" />
-                  </button>
-                </td>
+        {loading ? (
+          <div className="p-6 text-center text-gray-500">Loading users...</div>
+        ) : users.length > 0 ? (
+          <table className="w-full">
+            <thead>
+              <tr className="text-left bg-gray-50">
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Email
+                </th>
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Date Created
+                </th>
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {users.map((user) => (
+                <tr key={user.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">{user.email}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-600">
+                      {new Date(user.created_at).toLocaleDateString()}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button className="text-gray-400 hover:text-gray-600">
+                      <MoreVertical className="h-5 w-5" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="p-6 text-center text-gray-500">No users found.</div>
+        )}
       </div>
     </div>
   );
