@@ -19,7 +19,7 @@ export default function TeamManagement() {
       setLoading(true);
       const { data, error } = await supabase
         .from('users')
-        .select('id, auth_user_id, email, created_at');
+        .select('id, email, created_at');
       if (error) {
         console.error('Error fetching users:', error);
       } else {
@@ -50,7 +50,7 @@ export default function TeamManagement() {
       // Fetch updated users
       const { data } = await supabase
         .from('users')
-        .select('id, auth_user_id, email, created_at');
+        .select('id, email, created_at');
       setUsers(data);
 
       setNewEmail('');
