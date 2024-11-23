@@ -14,3 +14,41 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true
   }
 });
+
+// /api/deleteUser.js (Node.js serverless API or Next.js API route)
+// Initialize Supabase Admin client
+const supabaseAdmin = createClient(
+  process.env.REACT_APP_SUPABASE_URL,
+  process.env.REACT_APP_SUPABASE_ANON_KEY // Ensure this key is stored securely
+);
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const { userId } = req.body;
+
+  try {
+    // Delete the user from auth.users
+    const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    if (deleteAuthError) {
+      return res.status(400).json({ error: deleteAuthError.message });
+    }
+
+    // Delete the user from public.users table
+    const { error: deletePublicError } = await supabaseAdmin
+      .from('users')
+      .delete()
+      .eq('id', userId);
+
+    if (deletePublicError) {
+      return res.status(400).json({ error: deletePublicError.message });
+    }
+
+    res.status(200).json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
