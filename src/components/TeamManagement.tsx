@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Users, UserPlus, MoreVertical, Trash2 } from 'lucide-react';
+import { useAuthStore } from '../store/authStore'; // Import the authStore
 import { supabase } from '../lib/supabase.ts';
 
 export default function TeamManagement() {
@@ -8,6 +9,9 @@ export default function TeamManagement() {
   const [showModal, setShowModal] = useState(false);
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [newCompanyName, setNewCompanyName] = useState('');
+
+  const { signUp } = useAuthStore(); // Access signUp from authStore
 
   // Fetch users from Supabase
   useEffect(() => {
@@ -27,45 +31,28 @@ export default function TeamManagement() {
   // Add a new user
   const addUser = async () => {
     try {
-      const { user, error } = await supabase.auth.signUp({
-        email: newEmail,
-        password: newPassword,
-      });
-
-      if (error) throw error;
+      // Use the authStore to sign up the user
+      await signUp(newEmail, newPassword, newCompanyName);
 
       // Add user to public.users
       await supabase.from('users').insert({
-        id: user.id,
         email: newEmail,
+        company_name: newCompanyName,
         created_at: new Date().toISOString(),
       });
 
-      setUsers((prev) => [...prev, { id: user.id, email: newEmail, created_at: new Date() }]);
+      // Fetch updated users
+      const { data } = await supabase.from('users').select('id, email, created_at');
+      setUsers(data);
+
       setNewEmail('');
       setNewPassword('');
+      setNewCompanyName('');
       setShowModal(false);
     } catch (error) {
       console.error('Error adding user:', error.message);
     }
   };
-
-  // Delete a user
-  const deleteUser = async (userId) => {
-    try {
-      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-      if (authError) throw authError;
-  
-      // Delete from public.users
-      const { error: publicError } = await supabase.from('users').delete().eq('id', userId);
-      if (publicError) throw publicError;
-  
-      setUsers((prev) => prev.filter((user) => user.id !== userId));
-    } catch (error) {
-      console.error('Error deleting user:', error.message);
-    }
-  };
-  
 
   return (
     <div className="bg-white rounded-xl shadow-sm">
@@ -115,10 +102,7 @@ export default function TeamManagement() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => deleteUser(user.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
+                    <button className="text-red-500 hover:text-red-700">
                       <Trash2 className="h-5 w-5" />
                     </button>
                   </td>
@@ -148,6 +132,13 @@ export default function TeamManagement() {
               placeholder="Password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
+              className="mb-3 w-full px-4 py-2 border rounded-lg"
+            />
+            <input
+              type="text"
+              placeholder="Company Name"
+              value={newCompanyName}
+              onChange={(e) => setNewCompanyName(e.target.value)}
               className="mb-3 w-full px-4 py-2 border rounded-lg"
             />
             <div className="flex justify-end space-x-3">
