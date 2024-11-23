@@ -63,36 +63,35 @@ export default function TeamManagement() {
   };
 
   // Delete a user (calls backend API)
-  const deleteUser = async (authUserId) => {
-    if (
-      !confirm(
-        'Are you sure you want to delete this user? This action cannot be undone.'
-      )
-    ) {
-      return;
-    }
-    try {
-      const response = await fetch('/api/deleteUser', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId: authUserId }),
-      });
+ const deleteUser = async (authUserId) => {
+  // Confirmation dialog
+  if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+    return;
+  }
 
-      if (!response.ok) {
-        const errorResponse = await response.json();
-        const errorMessage = errorResponse.error || 'Failed to delete user';
-        throw new Error(errorMessage);
-      }
+  try {
+    const response = await fetch('/api/deleteUser', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId: authUserId }),
+    });
 
-      // Update local state
-      setUsers((prev) => prev.filter((user) => user.id !== authUserId));
-    } catch (error) {
-      console.error('Error deleting user:', error.message);
-      alert(`Error deleting user: ${error.message}`);
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      const errorMessage = errorResponse.error || 'Failed to delete user';
+      throw new Error(errorMessage);
     }
-  };
+
+    // Update local state
+    setUsers((prev) => prev.filter((user) => user.auth_user_id !== authUserId));
+  } catch (error) {
+    console.error('Error deleting user:', error.message);
+    alert(`Error deleting user: ${error.message}`);
+  }
+};
+
 
   return (
     <div className="bg-white rounded-xl shadow-sm">
