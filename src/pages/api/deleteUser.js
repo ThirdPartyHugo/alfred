@@ -1,24 +1,20 @@
-import { createClient } from '@supabase/supabase-js';
+// pages/api/deleteUser.js
 
-// Initialize Supabase client with service role key
-const supabaseAdmin = createClient(
-  process.env.REACT_APP_SUPABASE_URL,
-  process.env.REACT_APP_SUPABASE_ANON_KEY
-);
+import supabaseAdmin from '../../lib/supabaseAdmin';
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { userId } = req.body;
 
-    // Delete user from auth.users using admin client
+    // Delete user from auth.users using the service role key
     const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
 
     if (error) {
-      console.error('Error deleting user from auth:', error);
+      console.error('Error deleting user:', error);
       return res.status(400).json({ error: error.message });
     }
 
-    // Delete the user from your 'users' table
+    // Optionally, delete the user from your 'users' table
     const { error: deleteError } = await supabaseAdmin
       .from('users')
       .delete()
@@ -32,6 +28,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ message: 'User deleted successfully' });
   } else {
     res.setHeader('Allow', 'POST');
-    res.status(405).json({ error: 'Method not allowed' });
+    res.status(405).json({ error: 'Method Not Allowed' });
   }
 }
