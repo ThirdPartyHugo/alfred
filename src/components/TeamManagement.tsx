@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Users, UserPlus, Trash2 } from 'lucide-react';
-import { useAuthStore } from '../store/authStore';
-import { supabase } from '../lib/supabase.ts';
+import { useAuthStore } from '../store/authStore'; // Import the authStore
+import { supabase } from '../lib/supabase';
 
 export default function TeamManagement() {
   const [users, setUsers] = useState([]);
@@ -11,7 +11,7 @@ export default function TeamManagement() {
   const [newPassword, setNewPassword] = useState('');
   const [newCompanyName, setNewCompanyName] = useState('');
 
-  const { signUp } = useAuthStore();
+  const { signUp } = useAuthStore(); // Access signUp from authStore
 
   // Fetch users from Supabase
   useEffect(() => {
@@ -33,15 +33,12 @@ export default function TeamManagement() {
   // Add a new user
   const addUser = async () => {
     try {
-      const { user, error } = await signUp(newEmail, newPassword, newCompanyName);
+      // Use the authStore to sign up the user
+      await signUp(newEmail, newPassword, newCompanyName);
 
-      if (error) {
-        throw error;
-      }
-
-      // Add user to public.users with auth_user_id
+      // Add user to public.users
       await supabase.from('users').insert({
-        auth_user_id: user.id,
+        id: user.id, // Use the UUID from auth.users.id
         email: newEmail,
         company_name: newCompanyName,
         created_at: new Date().toISOString(),
@@ -63,21 +60,14 @@ export default function TeamManagement() {
   };
 
   // Delete a user (calls backend API)
-  const deleteUser = async (authUserId) => {
-    if (
-      !confirm(
-        'Are you sure you want to delete this user? This action cannot be undone.'
-      )
-    ) {
-      return;
-    }
+  const deleteUser = async (userId) => {
     try {
       const response = await fetch('/api/deleteUser', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId: authUserId }),
+        body: JSON.stringify({ userId }),
       });
 
       if (!response.ok) {
@@ -87,12 +77,12 @@ export default function TeamManagement() {
       }
 
       // Update local state
-      setUsers((prev) => prev.filter((user) => user.id !== authUserId));
+      setUsers((prev) => prev.filter((user) => user.id !== userId));
     } catch (error) {
       console.error('Error deleting user:', error.message);
-      alert(`Error deleting user: ${error.message}`);
     }
   };
+
 
   return (
     <div className="bg-white rounded-xl shadow-sm">
