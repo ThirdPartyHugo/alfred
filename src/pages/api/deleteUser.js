@@ -5,9 +5,10 @@ import supabaseAdmin from '../../lib/supabaseAdmin';
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { userId } = req.body;
+    console.log(userId);
 
     // Delete user from auth.users using the service role key
-    const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    const { data, error } = await supabaseAdmin.auth.admin.deleteUser(userId);
 
     if (error) {
       console.error('Error deleting user:', error);
