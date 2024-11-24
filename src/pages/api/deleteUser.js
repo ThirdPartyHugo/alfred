@@ -5,14 +5,14 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware to parse JSON requests
+// Initialize Supabase client with service role key
+const supabase = createClient(process.env.REACT_APP_SUPABASE_URL, process.env.REACT_APP_SUPABASE_ANON_KEY);
+
+// Middleware to parse JSON bodies
 app.use(express.json());
 
-// Initialize Supabase client
-const supabase = createClient('https://your-project.supabase.co', process.env.SUPABASE_SERVICE_ROLE_KEY);
-
-// Delete user route
-app.delete('/api/deleteUser', async (req, res) => {
+// Endpoint to delete a user
+app.delete('/delete-user', async (req, res) => {
   const { userId } = req.body;
 
   if (!userId) {
