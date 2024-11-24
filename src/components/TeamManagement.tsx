@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Users, UserPlus, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore'; // Import the authStore
+import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+
+// Create a Supabase admin client
+const supabaseAdmin = createClient(
+  process.env.REACT_APP_SUPABASE_URL as string,
+  process.env.REACT_APP_SUPABASE_SERVICE_ROLE_KEY as string // Use the service role key
+);
 
 export default function TeamManagement() {
   const [users, setUsers] = useState([]);
@@ -34,7 +41,7 @@ export default function TeamManagement() {
   const addUser = async () => {
     try {
       // Use the authStore to sign up the user
-      await signUp(newEmail, newPassword, newCompanyName);
+      const { user } = await signUp(newEmail, newPassword, newCompanyName);
 
       // Add user to public.users
       await supabase.from('users').insert({
@@ -59,31 +66,24 @@ export default function TeamManagement() {
     }
   };
 
-  // Delete a user (calls backend API)
-  const deleteUser = async (userId) => {
+  // Delete a user using Supabase admin API
+  const deleteUser = async (userId: string) => {
     try {
-      const response = await fetch('/api/deleteUser', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId }),
-      });
-  
-      if (!response.ok) {
-        throw new Error(`Failed to delete user: ${response.statusText}`);
+      setLoading(true);
+      const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+      if (error) {
+        throw new Error(error.message);
       }
-  
-      const data = await response.json();
-      console.log('User deleted:', data);
-    } catch (error) {
-      console.error(error);
+
+      // Remove the user from the local state after successful deletion
+      setUsers(users.filter((user) => user.id !== userId));
+      console.log(`User with ID ${userId} deleted successfully.`);
+    } catch (error: any) {
+      console.error('Error deleting user:', error.message);
+    } finally {
+      setLoading(false);
     }
   };
-  
-  
-  
-  
 
   return (
     <div className="bg-white rounded-xl shadow-sm">
