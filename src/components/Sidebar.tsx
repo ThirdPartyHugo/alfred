@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link'; // Import Next.js Link component
 import { Brain, BarChart3, Users, FileText, Calendar, Settings, HelpCircle } from 'lucide-react';
 
 export default function Sidebar() {
@@ -14,25 +15,27 @@ export default function Sidebar() {
       <nav className="flex-1 px-3">
         <div className="space-y-1">
           {[
-            { name: 'Dashboard', icon: BarChart3, current: true },
-            { name: 'Clients', icon: Users },
-            { name: 'Documents', icon: FileText },
-            { name: 'Calendar', icon: Calendar },
+            { name: 'Dashboard', icon: BarChart3, href: '/' },
+            { name: 'Clients', icon: Users, href: '/clients' },
+            { name: 'Documents', icon: FileText, href: '/documents' },
+            { name: 'Calendar', icon: Calendar, href: '/calendar' },
           ].map((item) => (
-            <a
-              key={item.name}
-              href="#"
-              className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg ${
-                item.current
-                  ? 'bg-blue-50 text-blue-600'
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <item.icon className={`mr-3 h-5 w-5 ${
-                item.current ? 'text-blue-600' : 'text-gray-400'
-              }`} />
-              {item.name}
-            </a>
+            <Link key={item.name} href={item.href}>
+              <a
+                className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg ${
+                  item.current
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <item.icon
+                  className={`mr-3 h-5 w-5 ${
+                    item.current ? 'text-blue-600' : 'text-gray-400'
+                  }`}
+                />
+                {item.name}
+              </a>
+            </Link>
           ))}
         </div>
       </nav>
@@ -40,17 +43,15 @@ export default function Sidebar() {
       <div className="px-3 mt-auto">
         <div className="space-y-1">
           {[
-            { name: 'Settings', icon: Settings },
-            { name: 'Help', icon: HelpCircle },
+            { name: 'Settings', icon: Settings, href: '/settings' },
+            { name: 'Help', icon: HelpCircle, href: '/help' },
           ].map((item) => (
-            <a
-              key={item.name}
-              href="#"
-              className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50"
-            >
-              <item.icon className="mr-3 h-5 w-5 text-gray-400" />
-              {item.name}
-            </a>
+            <Link key={item.name} href={item.href}>
+              <a className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50">
+                <item.icon className="mr-3 h-5 w-5 text-gray-400" />
+                {item.name}
+              </a>
+            </Link>
           ))}
         </div>
       </div>
