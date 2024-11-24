@@ -44,7 +44,6 @@ export default function ClientsOverview() {
         .from('clients')
         .insert({
           name: newClientName,
-          business_name: newBusinessName,
         })
         .select();
 
