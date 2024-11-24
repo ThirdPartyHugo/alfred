@@ -1,67 +1,61 @@
-import React from 'react'; 
-import { Bell, Search, Settings, LogOut } from 'lucide-react';
-import { supabase } from '../lib/supabase'; // Adjust the path to your Supabase client
-import { useNavigate } from 'react-router-dom'; // If you're using react-router-dom for navigation
+import React from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for routing
+import { Brain, BarChart3, Users, FileText, Calendar, Settings, HelpCircle } from 'lucide-react';
 
-export default function Header() {
-  const navigate = useNavigate();
+export default function Sidebar() {
+  const navigate = useNavigate(); // Initialize navigation
 
-  const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Error signing out:', error.message);
-        return;
-      }
-      // Redirect to login or home page after sign out
-      navigate('/login');
-    } catch (err) {
-      console.error('Unexpected error signing out:', err);
-    }
+  // Handle navigation on click
+  const handleNavigation = (path) => {
+    navigate(path);
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center flex-1">
-          <div className="relative w-96">
-            <input
-              type="text"
-              placeholder="Search clients, campaigns, or analytics..."
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-4">
-          <button className="relative p-2 text-gray-400 hover:text-gray-600 focus:outline-none">
-            <Bell className="h-6 w-6" />
-            <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
-          </button>
-          <button className="p-2 text-gray-400 hover:text-gray-600 focus:outline-none">
-            <Settings className="h-6 w-6" />
-          </button>
-          <div className="flex items-center space-x-3">
-            <img
-              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-              alt="Profile"
-              className="h-8 w-8 rounded-full"
-            />
-            <div className="hidden md:block">
-              <p className="text-sm font-medium">John Doe</p>
-              <p className="text-xs text-gray-500">Agency Owner</p>
-            </div>
-          </div>
-          <button
-            onClick={handleSignOut}
-            className="flex items-center p-2 text-gray-400 hover:text-red-500 focus:outline-none"
-          >
-            <LogOut className="h-6 w-6" />
-            <span className="ml-2 hidden md:block text-sm font-medium">Sign Out</span>
-          </button>
+    <aside className="w-64 bg-white border-r border-gray-200 py-6 flex flex-col">
+      <div className="px-6 mb-8">
+        <div className="flex items-center space-x-3">
+          <Brain className="h-8 w-8 text-blue-600" />
+          <span className="text-2xl font-bold text-gray-900">Alfred</span>
         </div>
       </div>
-    </header>
+      
+      <nav className="flex-1 px-3">
+        <div className="space-y-1">
+          {[
+            { name: 'Dashboard', icon: BarChart3, path: '/' },
+            { name: 'Clients', icon: Users, path: '/clients' },
+            { name: 'Documents', icon: FileText, path: '/documents' },
+            { name: 'Calendar', icon: Calendar, path: '/calendar' },
+          ].map((item) => (
+            <button
+              key={item.name}
+              onClick={() => handleNavigation(item.path)}
+              className="flex items-center px-3 py-2 w-full text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50"
+            >
+              <item.icon className="mr-3 h-5 w-5 text-gray-400" />
+              {item.name}
+            </button>
+          ))}
+        </div>
+      </nav>
+      
+      <div className="px-3 mt-auto">
+        <div className="space-y-1">
+          {[
+            { name: 'Settings', icon: Settings, path: '/settings' },
+            { name: 'Help', icon: HelpCircle, path: '/help' },
+          ].map((item) => (
+            <button
+              key={item.name}
+              onClick={() => handleNavigation(item.path)}
+              className="flex items-center px-3 py-2 w-full text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50"
+            >
+              <item.icon className="mr-3 h-5 w-5 text-gray-400" />
+              {item.name}
+            </button>
+          ))}
+        </div>
+      </div>
+    </aside>
   );
 }
