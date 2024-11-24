@@ -38,7 +38,7 @@ export default function TeamManagement() {
   const addUser = async () => {
     try {
       // Step 1: Sign up the user using Supabase
-      const { user, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email: newEmail,
         password: newPassword,
         options: { data: { company_name: newCompanyName } },
@@ -48,24 +48,12 @@ export default function TeamManagement() {
         throw new Error(`SignUp Error: ${error.message}`);
       }
   
-      console.log('User signed up successfully:', user);
+      console.log('User signed up successfully.');
   
-      // Step 2: Insert user into public.users table
-      const { error: insertError } = await supabase.from('users').insert({
-        id: user.id, // Use the UUID from Supabase auth.users.id
-        email: newEmail,
-        company_name: newCompanyName,
-        created_at: new Date().toISOString(),
-      });
-  
-      if (insertError) {
-        throw new Error(`Database Insert Error: ${insertError.message}`);
-      }
-  
-      console.log('User added to the database successfully.');
-  
-      // Step 3: Refresh the team list
-      const { data, error: fetchError } = await supabase.from('users').select('id, email, created_at');
+      // Step 2: Reload the users from the database
+      const { data, error: fetchError } = await supabase
+        .from('users')
+        .select('id, email, created_at');
       if (fetchError) {
         throw new Error(`Fetch Users Error: ${fetchError.message}`);
       }
