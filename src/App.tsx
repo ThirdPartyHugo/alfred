@@ -51,7 +51,7 @@ export function App() {
 
           {/* Protected routes */}
           <Route path="/dashboard/*" element={user ? <Dashboard /> : <Navigate to="/login" />} />
-          <Route path="/clients" element={user ? <Navigate to="/clients" /> : <ClientsOverview /> } />
+          <Route path="/clients" element={user ? <ClientsOverview /> : <Navigate to="/clients" />} />
 
           {/* Catch-all route */}
           <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} />} />
