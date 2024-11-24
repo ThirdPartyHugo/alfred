@@ -70,19 +70,19 @@ export default function TeamManagement() {
     }
     try {
       const response = await fetch('/api/deleteUser', {
-        method: 'DELETE',
+        method: 'DELETE', // Ensure the method matches the backend route
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({ userId }), // Ensure the body contains the userId
       });
-
+  
       if (!response.ok) {
-        const errorResponse = await response.json();
+        const errorResponse = await response.json(); // Parse error response
         const errorMessage = errorResponse.error || 'Failed to delete user';
         throw new Error(errorMessage);
       }
-
+  
       // Update local state
       setUsers((prev) => prev.filter((user) => user.id !== userId));
     } catch (error) {
@@ -90,6 +90,7 @@ export default function TeamManagement() {
       alert(`Error deleting user: ${error.message}`);
     }
   };
+  
 
   return (
     <div className="bg-white rounded-xl shadow-sm">
