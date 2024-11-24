@@ -71,16 +71,16 @@ export default function TeamManagement() {
       });
   
       if (!response.ok) {
-        const errorResponse = await response.json();
-        throw new Error(errorResponse.error || 'Failed to delete user');
+        throw new Error(`Failed to delete user: ${response.statusText}`);
       }
   
-      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
+      const data = await response.json();
+      console.log('User deleted:', data);
     } catch (error) {
-      console.error('Error deleting user:', error.message);
-      alert(`Error deleting user: ${error.message}`);
+      console.error(error);
     }
   };
+  
   
   
   
