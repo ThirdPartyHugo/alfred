@@ -5,7 +5,7 @@ import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
-import ClientsOverview from './pages/Clients'; // Import Clients page
+import ClientsOverview from './pages/clients'; // Import Clients page
 import { useAuthStore } from './store/authStore';
 import { supabase } from './lib/supabase';
 import LoadingScreen from './components/LoadingScreen';
