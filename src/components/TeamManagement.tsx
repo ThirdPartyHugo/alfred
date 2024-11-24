@@ -61,6 +61,7 @@ export default function TeamManagement() {
 
   // Delete a user (calls backend API)
   const deleteUser = async (userId) => {
+    console.log(userId);
     if (
       !confirm(
         'Are you sure you want to delete this user? This action cannot be undone.'
