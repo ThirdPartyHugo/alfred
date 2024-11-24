@@ -53,7 +53,7 @@ export default function ClientsOverview() {
         .from('clients')
         .insert({
           name: newClientName,
-          business_name: newBusinessName,
+          
         })
         .select();
 
@@ -84,7 +84,6 @@ export default function ClientsOverview() {
         .select(`
           id,
           name,
-          business_name,
           user_clients(user_id, users(email))
         `);
 
