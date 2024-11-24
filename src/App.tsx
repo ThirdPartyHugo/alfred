@@ -5,6 +5,7 @@ import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
+import ClientsOverview from './pages/Clients'; // Import Clients page
 import { useAuthStore } from './store/authStore';
 import { supabase } from './lib/supabase';
 import LoadingScreen from './components/LoadingScreen';
@@ -50,6 +51,7 @@ export function App() {
 
           {/* Protected routes */}
           <Route path="/dashboard/*" element={user ? <Dashboard /> : <Navigate to="/login" />} />
+          <Route path="/clients" element={user ? <ClientsOverview /> : <Navigate to="/login" />} />
 
           {/* Catch-all route */}
           <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} />} />
