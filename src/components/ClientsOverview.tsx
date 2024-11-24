@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MoreVertical, TrendingUp, TrendingDown } from 'lucide-react';
+import { MoreVertical } from 'lucide-react';
 import { supabase } from '../lib/supabase'; // Ensure your Supabase client is configured correctly
 
 export default function ClientsOverview() {
@@ -11,11 +11,20 @@ export default function ClientsOverview() {
   const [newBusinessName, setNewBusinessName] = useState('');
   const [selectedUsers, setSelectedUsers] = useState([]);
 
-  // Fetch clients from Supabase
+  // Fetch clients and their related users
   useEffect(() => {
     const fetchClients = async () => {
       setLoading(true);
-      const { data, error } = await supabase.from('clients').select('*');
+
+      const { data, error } = await supabase
+        .from('clients')
+        .select(`
+          id,
+          name,
+          business_name,
+          user_clients(user_id, users(email))
+        `);
+
       if (error) {
         console.error('Error fetching clients:', error);
       } else {
@@ -44,6 +53,7 @@ export default function ClientsOverview() {
         .from('clients')
         .insert({
           name: newClientName,
+          business_name: newBusinessName,
         })
         .select();
 
@@ -69,7 +79,15 @@ export default function ClientsOverview() {
       }
 
       // Fetch updated clients
-      const { data: updatedClients } = await supabase.from('clients').select('*');
+      const { data: updatedClients } = await supabase
+        .from('clients')
+        .select(`
+          id,
+          name,
+          business_name,
+          user_clients(user_id, users(email))
+        `);
+
       setClients(updatedClients);
 
       // Reset modal state
@@ -113,6 +131,7 @@ export default function ClientsOverview() {
               <tr className="text-left bg-gray-50">
                 <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
                 <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Business</th>
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Users</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -123,6 +142,19 @@ export default function ClientsOverview() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-600">{client.business_name}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-600">
+                      {client.user_clients.length > 0 ? (
+                        client.user_clients.map((userClient) => (
+                          <div key={userClient.user_id}>
+                            {userClient.users.email}
+                          </div>
+                        ))
+                      ) : (
+                        <span>No users assigned</span>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
