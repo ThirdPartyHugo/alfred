@@ -6,9 +6,7 @@ export default function Sidebar() {
   const navigate = useNavigate(); // Initialize navigation
 
   // Handle navigation on click
-  const handleNavigation = (path) => {
-    navigate(path);
-  };
+  
 
   return (
     <aside className="w-64 bg-white border-r border-gray-200 py-6 flex flex-col">
@@ -29,7 +27,7 @@ export default function Sidebar() {
           ].map((item) => (
             <button
               key={item.name}
-              onClick={() => handleNavigation(item.path)}
+              onClick={() => navigate(item.path)}
               className="flex items-center px-3 py-2 w-full text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50"
             >
               <item.icon className="mr-3 h-5 w-5 text-gray-400" />
@@ -47,7 +45,7 @@ export default function Sidebar() {
           ].map((item) => (
             <button
               key={item.name}
-              onClick={() => handleNavigation(item.path)}
+              onClick={() => navigate(item.path)}
               className="flex items-center px-3 py-2 w-full text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50"
             >
               <item.icon className="mr-3 h-5 w-5 text-gray-400" />
