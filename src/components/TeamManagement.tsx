@@ -37,23 +37,36 @@ export default function TeamManagement() {
   // Add a new user
   const addUser = async () => {
     try {
-      // Use the authStore to sign up the user
-      const { user } = await signUp(newEmail, newPassword, newCompanyName);
-
-      // Add user to public.users
-      await supabase.from('users').insert({
-        id: user.id, // Use the UUID from auth.users.id
+      console.log('Starting user signup process...');
+      
+      // Step 1: Sign up the user
+      const { user, error: signUpError } = await signUp(newEmail, newPassword, newCompanyName);
+      if (signUpError) throw new Error(`SignUp Error: ${signUpError.message}`);
+      if (!user || !user.id) throw new Error('SignUp did not return a valid user.');
+  
+      console.log('User signed up successfully:', user);
+  
+      // Step 2: Insert user into public.users
+      const { error: insertError } = await supabase.from('users').insert({
+        id: user.id, // Ensure user.id is defined
         email: newEmail,
         company_name: newCompanyName,
         created_at: new Date().toISOString(),
       });
-
-      // Fetch updated users
-      const { data } = await supabase
-        .from('users')
-        .select('id, email, created_at');
+      if (insertError) throw new Error(`Database Insert Error: ${insertError.message}`);
+  
+      console.log('User inserted into the database successfully.');
+  
+      // Step 3: Fetch updated list of users
+      const { data, error: fetchError } = await supabase.from('users').select('id, email, created_at');
+      if (fetchError) throw new Error(`Fetch Users Error: ${fetchError.message}`);
+  
+      console.log('Fetched updated users:', data);
+  
+      // Update state with the new list of users
       setUsers(data);
-
+  
+      // Reset modal fields and close modal
       setNewEmail('');
       setNewPassword('');
       setNewCompanyName('');
@@ -62,7 +75,7 @@ export default function TeamManagement() {
       console.error('Error adding user:', error.message);
     }
   };
-
+  
   // Delete a user using Supabase admin API
   const deleteUser = async (userId: string) => {
     try {
