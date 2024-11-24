@@ -6,7 +6,7 @@ const supabaseAdmin = createClient(
   process.env.REACT_APP_SUPABASE_URL,
   process.env.REACT_APP_SUPABASE_ANON_KEY
 );
-
+console.log("hello");
 export default async function handler(req, res) {
   if (req.method === 'DELETE') {
     try {
