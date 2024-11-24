@@ -61,14 +61,6 @@ export default function TeamManagement() {
 
   // Delete a user (calls backend API)
   const deleteUser = async (userId) => {
-    console.log(userId);
-    if (
-      !confirm(
-        'Are you sure you want to delete this user? This action cannot be undone.'
-      )
-    ) {
-      return;
-    }
     try {
       const response = await fetch('/api/deleteUser', {
         method: 'DELETE',
@@ -80,17 +72,16 @@ export default function TeamManagement() {
   
       if (!response.ok) {
         const errorResponse = await response.json();
-        const errorMessage = errorResponse.error || 'Failed to delete user';
-        throw new Error(errorMessage);
+        throw new Error(errorResponse.error || 'Failed to delete user');
       }
   
-      // Update local state
-      setUsers((prev) => prev.filter((user) => user.id !== userId));
+      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
     } catch (error) {
       console.error('Error deleting user:', error.message);
       alert(`Error deleting user: ${error.message}`);
     }
   };
+  
   
   
 

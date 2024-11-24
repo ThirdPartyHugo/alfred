@@ -1,35 +1,33 @@
-// src/pages/api/deleteUser.js
+const express = require('express');
+const bodyParser = require('body-parser');
+const { createClient } = require('@supabase/supabase-js');
 
-import { createClient } from '@supabase/supabase-js';
+const app = express();
+const PORT = 3001;
 
 const supabaseAdmin = createClient(
-  process.env.REACT_APP_SUPABASE_URL,
-  process.env.REACT_APP_SUPABASE_ANON_KEY
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
-console.log("hello");
-export default async function handler(req, res) {
-  if (req.method === 'DELETE') {
-    try {
-      const { userId } = req.body;
 
-      if (!userId) {
-        return res.status(400).json({ error: 'User ID is required' });
-      }
+app.use(bodyParser.json());
 
-      const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+app.delete('/api/deleteUser', async (req, res) => {
+  const { userId } = req.body;
 
-      if (error) {
-        console.error('Error deleting user:', error.message);
-        return res.status(500).json({ error: 'Failed to delete user' });
-      }
-
-      return res.status(200).json({ message: 'User deleted successfully' });
-    } catch (error) {
-      console.error('Unexpected error:', error.message);
-      return res.status(500).json({ error: 'An unexpected error occurred' });
-    }
-  } else {
-    res.setHeader('Allow', ['DELETE']);
-    return res.status(405).end(`Method ${req.method} Not Allowed`);
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
   }
-}
+
+  try {
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    if (error) throw error;
+
+    res.status(200).json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting user:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
