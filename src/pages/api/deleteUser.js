@@ -12,7 +12,7 @@ const supabase = createClient(process.env.REACT_APP_SUPABASE_URL, process.env.RE
 app.use(express.json());
 
 // Endpoint to delete a user
-app.delete('/delete-user', async (req, res) => {
+app.delete('/api/delete-user', async (req, res) => {
   const { userId } = req.body;
 
   if (!userId) {
