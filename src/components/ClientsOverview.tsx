@@ -4,16 +4,18 @@ import { supabase } from '../lib/supabase'; // Ensure your Supabase client is co
 
 export default function ClientsOverview() {
   const [clients, setClients] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [newClientName, setNewClientName] = useState('');
+  const [newBusinessName, setNewBusinessName] = useState('');
+  const [selectedUsers, setSelectedUsers] = useState([]);
 
   // Fetch clients from Supabase
   useEffect(() => {
     const fetchClients = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('clients')
-        .select('*');
-
+      const { data, error } = await supabase.from('clients').select('*');
       if (error) {
         console.error('Error fetching clients:', error);
       } else {
@@ -22,16 +24,83 @@ export default function ClientsOverview() {
       setLoading(false);
     };
 
+    const fetchUsers = async () => {
+      const { data, error } = await supabase.from('users').select('id, email');
+      if (error) {
+        console.error('Error fetching users:', error);
+      } else {
+        setUsers(data);
+      }
+    };
+
     fetchClients();
+    fetchUsers();
   }, []);
+
+  // Handle adding a new client
+  const addClient = async () => {
+    try {
+      const { data: newClient, error } = await supabase
+        .from('clients')
+        .insert({
+          name: newClientName,
+          business_name: newBusinessName,
+        })
+        .select();
+
+      if (error) {
+        throw error;
+      }
+
+      // Assign selected users to the new client
+      const clientId = newClient[0]?.id; // Get the new client ID
+      const assignments = selectedUsers.map((userId) => ({
+        client_id: clientId,
+        user_id: userId,
+      }));
+
+      if (assignments.length > 0) {
+        const { error: assignmentError } = await supabase
+          .from('user_clients')
+          .insert(assignments);
+
+        if (assignmentError) {
+          throw assignmentError;
+        }
+      }
+
+      // Fetch updated clients
+      const { data: updatedClients } = await supabase.from('clients').select('*');
+      setClients(updatedClients);
+
+      // Reset modal state
+      setNewClientName('');
+      setNewBusinessName('');
+      setSelectedUsers([]);
+      setShowModal(false);
+    } catch (error) {
+      console.error('Error adding client:', error.message);
+    }
+  };
+
+  const toggleUserSelection = (userId) => {
+    setSelectedUsers((prevSelected) =>
+      prevSelected.includes(userId)
+        ? prevSelected.filter((id) => id !== userId)
+        : [...prevSelected, userId]
+    );
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-sm">
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">Active Clients</h2>
-          <button className="text-gray-400 hover:text-gray-600">
-            <MoreVertical className="h-5 w-5" />
+          <button
+            onClick={() => setShowModal(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Add Client
           </button>
         </div>
       </div>
@@ -44,68 +113,17 @@ export default function ClientsOverview() {
             <thead>
               <tr className="text-left bg-gray-50">
                 <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Profit</th>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Performance</th>
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Business</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {clients.map((client) => (
                 <tr key={client.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <img
-                        className="h-10 w-10 rounded-full"
-                        src={client.image || 'https://via.placeholder.com/64'}
-                        alt="Client logo"
-                      />
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{client.name}</div>
-                      </div>
-                    </div>
+                    <div className="text-sm font-medium text-gray-900">{client.name}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        client.status === 'Active'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}
-                    >
-                      {client.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${client.balance.toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div
-                      className={`flex items-center text-sm ${
-                        client.profit >= 0 ? 'text-green-600' : 'text-red-600'
-                      }`}
-                    >
-                      {client.profit >= 0 ? (
-                        <TrendingUp className="h-4 w-4 mr-1" />
-                      ) : (
-                        <TrendingDown className="h-4 w-4 mr-1" />
-                      )}
-                      ${Math.abs(client.profit).toLocaleString()}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full ${
-                          client.performance >= 90
-                            ? 'bg-green-500'
-                            : client.performance >= 70
-                            ? 'bg-yellow-500'
-                            : 'bg-red-500'
-                        }`}
-                        style={{ width: `${client.performance}%` }}
-                      ></div>
-                    </div>
+                    <div className="text-sm text-gray-600">{client.business_name}</div>
                   </td>
                 </tr>
               ))}
@@ -115,6 +133,61 @@ export default function ClientsOverview() {
           <div className="p-6 text-center text-gray-500">No clients found.</div>
         )}
       </div>
+
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h3 className="text-lg font-semibold mb-4">Add New Client</h3>
+            <input
+              type="text"
+              placeholder="Client Name"
+              value={newClientName}
+              onChange={(e) => setNewClientName(e.target.value)}
+              className="mb-3 w-full px-4 py-2 border rounded-lg"
+            />
+            <input
+              type="text"
+              placeholder="Business Name"
+              value={newBusinessName}
+              onChange={(e) => setNewBusinessName(e.target.value)}
+              className="mb-3 w-full px-4 py-2 border rounded-lg"
+            />
+            <div className="mb-3">
+              <h4 className="text-sm font-semibold mb-2">Assign Users</h4>
+              <div className="max-h-40 overflow-y-auto border rounded-lg p-3">
+                {users.map((user) => (
+                  <div key={user.id} className="flex items-center mb-2">
+                    <input
+                      type="checkbox"
+                      id={`user-${user.id}`}
+                      checked={selectedUsers.includes(user.id)}
+                      onChange={() => toggleUserSelection(user.id)}
+                      className="mr-2"
+                    />
+                    <label htmlFor={`user-${user.id}`} className="text-sm text-gray-700">
+                      {user.email}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={addClient}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
