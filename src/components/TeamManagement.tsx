@@ -62,7 +62,7 @@ export default function TeamManagement() {
   // Delete a user (calls backend API)
   const deleteUser = async (userId) => {
     try {
-      const response = await fetch('/api/deleteUser', {
+      const response = await fetch('https://alfred-black.vercel.app:3001/api/deleteUser', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
