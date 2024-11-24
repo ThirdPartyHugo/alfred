@@ -5,10 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
 // Create a Supabase admin client
-const supabaseAdmin = createClient(
-  process.env.REACT_APP_SUPABASE_URL as string,
-  process.env.REACT_APP_SUPABASE_ANON_KEY as string// Use the service role key
-);
+
 
 export default function TeamManagement() {
   const [users, setUsers] = useState([]);
@@ -70,7 +67,7 @@ export default function TeamManagement() {
   const deleteUser = async (userId: string) => {
     try {
       setLoading(true);
-      const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+      const { error } = await supabase.auth.admin.deleteUser(userId);
       if (error) {
         throw new Error(error.message);
       }
