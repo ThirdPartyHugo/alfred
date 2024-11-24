@@ -39,7 +39,7 @@ export default async function handler(req, res) {
 }
 
 // Endpoint to delete a user
-app.delete('/api/delete-user', async (req, res) => {
+app.delete('/delete-user', async (req, res) => {
   const { userId } = req.body;
 
   if (!userId) {
