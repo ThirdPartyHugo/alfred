@@ -38,25 +38,7 @@ export default async function handler(req, res) {
   }
 }
 
-// Endpoint to delete a user
-app.delete('/delete-user', async (req, res) => {
-  const { userId } = req.body;
 
-  if (!userId) {
-    return res.status(400).json({ error: 'User ID is required' });
-  }
-
-  try {
-    const { error } = await supabase.auth.admin.deleteUser(userId);
-    if (error) {
-      throw error;
-    }
-    res.status(200).json({ message: 'User deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting user:', error.message);
-    res.status(500).json({ error: 'Failed to delete user' });
-  }
-});
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
