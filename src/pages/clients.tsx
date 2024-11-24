@@ -21,7 +21,7 @@ export default function ClientsOverview() {
         .select(`
           id,
           name,
-          business_name,
+          
           user_clients(user_id, users(email))
         `);
 
@@ -53,7 +53,7 @@ export default function ClientsOverview() {
         .from('clients')
         .insert({
           name: newClientName,
-          business_name: newBusinessName,
+          
         })
         .select();
 
@@ -84,7 +84,7 @@ export default function ClientsOverview() {
         .select(`
           id,
           name,
-          business_name,
+          
           user_clients(user_id, users(email))
         `);
 
@@ -141,7 +141,7 @@ export default function ClientsOverview() {
                     <div className="text-sm font-medium text-gray-900">{client.name}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-600">{client.business_name || 'No business name'}</div>
+                    <div className="text-sm text-gray-600"></div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-600">
