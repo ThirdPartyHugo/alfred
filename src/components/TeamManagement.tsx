@@ -37,36 +37,45 @@ export default function TeamManagement() {
   // Add a new user
   const addUser = async () => {
     try {
-      console.log('Starting user signup process...');
-      
-      // Step 1: Sign up the user
-      const { user, error: signUpError } = await signUp(newEmail, newPassword, newCompanyName);
-      if (signUpError) throw new Error(`SignUp Error: ${signUpError.message}`);
-      if (!user || !user.id) throw new Error('SignUp did not return a valid user.');
+      // Step 1: Sign up the user using Supabase
+      const { user, error } = await supabase.auth.signUp({
+        email: newEmail,
+        password: newPassword,
+        options: { data: { company_name: newCompanyName } },
+      });
+  
+      if (error) {
+        throw new Error(`SignUp Error: ${error.message}`);
+      }
   
       console.log('User signed up successfully:', user);
   
-      // Step 2: Insert user into public.users
+      // Step 2: Insert user into public.users table
       const { error: insertError } = await supabase.from('users').insert({
-        id: user.id, // Ensure user.id is defined
+        id: user.id, // Use the UUID from Supabase auth.users.id
         email: newEmail,
         company_name: newCompanyName,
         created_at: new Date().toISOString(),
       });
-      if (insertError) throw new Error(`Database Insert Error: ${insertError.message}`);
   
-      console.log('User inserted into the database successfully.');
+      if (insertError) {
+        throw new Error(`Database Insert Error: ${insertError.message}`);
+      }
   
-      // Step 3: Fetch updated list of users
+      console.log('User added to the database successfully.');
+  
+      // Step 3: Refresh the team list
       const { data, error: fetchError } = await supabase.from('users').select('id, email, created_at');
-      if (fetchError) throw new Error(`Fetch Users Error: ${fetchError.message}`);
+      if (fetchError) {
+        throw new Error(`Fetch Users Error: ${fetchError.message}`);
+      }
   
       console.log('Fetched updated users:', data);
   
-      // Update state with the new list of users
+      // Update the state with the new list of users
       setUsers(data);
   
-      // Reset modal fields and close modal
+      // Reset modal inputs and close modal
       setNewEmail('');
       setNewPassword('');
       setNewCompanyName('');
