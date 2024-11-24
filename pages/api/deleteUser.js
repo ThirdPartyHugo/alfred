@@ -1,15 +1,18 @@
+
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
+// Use the service role key for admin access
 const supabaseAdmin = createClient(
   process.env.REACT_APP_SUPABASE_URL,
   process.env.REACT_APP_SUPABASE_ANON_KEY
 );
-console.log("client created");
+console.log("Supabase client initialized");
 
 app.use(bodyParser.json());
 
@@ -31,4 +34,4 @@ app.delete('/api/deleteUser', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log(`Server running on`));
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
