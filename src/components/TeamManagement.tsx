@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabase';
 // Create a Supabase admin client
 const supabaseAdmin = createClient(
   process.env.REACT_APP_SUPABASE_URL as string,
-  process.env.REACT_APP_SUPABASE_SERVICE_ROLE_KEY as string // Use the service role key
+  process.env.REACT_APP_SUPABASE_ANON_KEY as string// Use the service role key
 );
 
 export default function TeamManagement() {
